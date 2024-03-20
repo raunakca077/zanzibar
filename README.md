@@ -24,12 +24,12 @@ Beautifully designed interface with vibrant colors and intuitive controls.
 
 # Tech Stack:
 
-Frontend: React.js for building the user interface.
-Backend: Node.js for server-side logic.
-Database: MongoDB for storing user data and game states.
-Communication: Socket.IO for real-time communication between clients and the server.
-Styling: Tailwind CSS for modern and responsive styling.
-Deployment: Hosted on a cloud platform like Heroku or AWS for accessibility from anywhere.
+> Frontend: React.js for building the user interface.
+> Backend: Node.js for server-side logic.
+> Database: MongoDB for storing user data and game states.
+> Communication: Socket.IO for real-time communication between clients and the server.
+> Styling: Tailwind CSS for modern and responsive styling.
+> Deployment: Hosted on a cloud platform like Heroku or AWS for accessibility from anywhere.
 
 # Get ready to roll the dice and embark on an exhilarating journey with Zanzibar!
 
