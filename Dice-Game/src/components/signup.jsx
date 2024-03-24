@@ -5,26 +5,42 @@ import Cookies from 'universal-cookie';
 export const Signup = ({ setAuth }) => {
   const cookie = new Cookies();
   const [player, setPlayer] = useState({});
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const register = () => {
-    axios
-      .post('http://localhost:3077/signup', player)
-      .then((res) => {
-        if (res.data === 'fail') {
-          window.alert('User already exists');
-        } else {
-          const { token, name, hashPass, email, uid } = res.data;
-          cookie.set('token', token);
-          cookie.set('uid', uid);
-          cookie.set('name', name);
-          cookie.set('email', email);
-          cookie.set('pass', hashPass);
-          setAuth(true);
-        }
-      })
-      .catch((err) => {
-        console.error('Error:', err);
-      });
+    if (player.name.length < 3) {
+      setNameError('Name must be at least 3 characters long');
+    }
+    if (player.name.length > 6) {
+      setNameError('Name must be at most 6 characters long');
+    }
+    else if (!emailRegex.test(player.email)) {
+      setEmailError('Please enter a valid email address');
+    } else {
+      setNameError('');
+      setEmailError('');
+      axios
+        .post('http://localhost:3077/signup', player)
+        .then((res) => {
+          if (res.data === 'fail') {
+            window.alert('User already exists');
+          } else {
+            const { token, name, hashPass, email, uid } = res.data;
+            cookie.set('token', token);
+            cookie.set('uid', uid);
+            cookie.set('name', name);
+            cookie.set('email', email);
+            cookie.set('pass', hashPass);
+            setAuth(true);
+          }
+        })
+        .catch((err) => {
+          console.error('Error:', err);
+        });
+    }
   };
 
   return (
@@ -44,7 +60,10 @@ export const Signup = ({ setAuth }) => {
             className="w-full px-3 py-2 rounded-md bg-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
             value={player.name}
             onChange={(evt) => setPlayer({ ...player, name: evt.target.value })}
+            minLength="3"
+            required
           />
+          {nameError && <p className="text-red-500 mt-1">{nameError}</p>}
         </div>
         <div className="mb-4">
           <label htmlFor="email" className="block text-gray-300 font-bold mb-2">
@@ -57,7 +76,10 @@ export const Signup = ({ setAuth }) => {
             className="w-full px-3 py-2 rounded-md bg-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
             value={player.email}
             onChange={(evt) => setPlayer({ ...player, email: evt.target.value })}
+            minLength="6"
+            required
           />
+          {emailError && <p className="text-red-500 mt-1">{emailError}</p>}
         </div>
         <div className="mb-6">
           <label htmlFor="password" className="block text-gray-300 font-bold mb-2">

@@ -35,9 +35,12 @@ io.on("connection",(socket)=>
     
     socket.on("message",(data)=>
     {
-        // console.log(data)
-       
        io.emit("recieve-msg",data)
+    })
+
+    socket.on("chips",(data)=>
+    {
+       io.emit("updatedChips",data)
     })
 
     socket.on("start",(data)=>
@@ -46,16 +49,21 @@ io.on("connection",(socket)=>
         io.to(socket.id).emit("start",data);
     })
 
+    socket.on("setPoints",(data)=>
+    {
+        io.emit("newPts",data);
+    })
+
+
     socket.on("rolled",(data)=>
     {
-        // console.log(data)
         let opponentSocketId=(socket.id==sktId[0])?sktId[1]:sktId[0];
        
        io.to(socket.id).emit("turn",false)
        io.emit("rolledNo",data)
        socket.broadcast.emit("turn",true)
-       console.log(sktId)
-       console.log("->>>",socket.id)
+    //    console.log(sktId)
+    //    console.log("->>>",socket.id)
     })
 
     // socket.on("disconnect",()=>{console.log("user disconnected")})

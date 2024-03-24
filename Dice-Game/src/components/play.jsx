@@ -3,7 +3,12 @@ import { io } from "socket.io-client";
 import { Chat } from "./chat";
 import { Dice } from "./dice";
 import ZanzibarRules from "./ZanzibarRules"
-import {calculate} from "../utils/scoreCal"
+import {calculate,chipTransfer} from "../utils/scoreCal"
+import cook from "universal-cookie";
+
+
+const cki=new cook()
+
 
 export const Play = ({ players, sum, setAuth }) => {
   const [isTurn, setTurn] = useState(true);
@@ -11,6 +16,11 @@ export const Play = ({ players, sum, setAuth }) => {
   const [isStart, setStart] = useState(false);
   const [rolledDice, setRoll] = useState([0, 0, 0]);
   const [skt, setSkt] = useState(null);
+  // const chips = 15;
+  const [winner,setWinner]=useState("");
+  const [chipsArr,setChipsArr]=useState([]);
+  const [pts,setPts]=useState({rank:0,score:""});
+  const [lastPoints,setlastPoints]=useState("");
 
   useEffect(() => {
     const socket = io("http://localhost:3077");
@@ -26,30 +36,107 @@ export const Play = ({ players, sum, setAuth }) => {
 
     socket.on("start", (data) => {
       setStart(true);
+      setRes(false)
+      
     });
 
-    socket.on("rolledNo", (data) => {
-      setRoll(data);
+    socket.on("newPts", (data) => {
+      // console.log(data)
+      setPts({rank:data.rank,score:data.score});
     });
+
+    const checkWinner=(data)=>
+  {
+    
+    
+    if(pts.rank==0)
+      {
+        let val=calculate(data);
+        setlastPoints(val.score)
+        socket.emit("setPoints",val)
+      }
+     else{
+      let p1=pts;
+      let prevPoint=pts.rank;
+      // console.log(pts)
+      let p2=calculate(data);
+      let newPoint=p2.rank;
+      // console.log("hii")
+      setlastPoints(p2.score)
+      if(prevPoint<newPoint)
+      {
+        const temp=[{chips:chipsArr[0].chips - chipTransfer(p1.score) ,name:chipsArr[0].name},chipsArr[1]]
+        setChipsArr(temp)
+       
+        if(chipsArr[0].chips<=1)
+        {
+          setRes(true);
+          setWinner(chipsArr[0].name)
+          
+          setTimeout(() => {
+            setChipsArr([])
+            setStart(false)
+          }, 5000);  
+          
+        }
+      }
+  
+      else if(prevPoint>newPoint)
+      {
+        
+        const temp=[chipsArr[0],{chips:chipsArr[1].chips - chipTransfer(pts.score) ,name:chipsArr[1].name}]
+        setChipsArr(temp)
+        
+        if(chipsArr[1].chips<=1)
+        {
+          setRes(true);
+          setWinner(chipsArr[1].name)
+          setTimeout(() => {
+            setChipsArr([])
+            setStart(false)
+          }, 5000);  
+          
+        }
+      }
+      socket.emit("setPoints",{rank:0,score:""})
+
+  
+     }
+    //  console.log(pts)
+  }
+
+
+    socket.on("rolledNo", (data)=>
+    {
+      setRoll(rolledDice=>{return data});
+      checkWinner(data)
+    })
 
     socket.on("turn", (data) => {
-      console.log("Turn:", data);
+      // console.log("Turn:", data);
       setTurn(data);
+    });
+
+    socket.on("updatedChips", (data) => {
+      setChipsArr(chipsArr=>[...chipsArr,data]);        //ye itna simply nai hoga bro
     });
 
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [pts,]);
 
+  
   const logout = () => {
     setAuth(false);
   };
 
-  const fun = (gotSum) => setRes(gotSum);
+  // const fun = (gotSum) => setRes(gotSum);
 
   const startGame = () => {
     skt.emit("start", 1);
+    skt.emit("chips",{chips:5,name:cki.cookies.name});
+
   };
 
   const roll = () => {
@@ -59,24 +146,49 @@ export const Play = ({ players, sum, setAuth }) => {
       arr.push(Math.round(Math.random() * 5) + 1);
       gotSum += arr[i];
     }
-    fun(gotSum);
+    // fun(gotSum);
     skt.emit("rolled", arr);
-   let ans=calculate(arr);
-   console.log(ans);
+    
   };
+
+let dist=0
 
   if (isStart) {
     return (
       <div className="grid grid-rows-8 ">
         <span className="flex items-center justify-center bg-gradient-to-r from-green-300 to-blue-350 rounded-lg py-2 px-4 mb-2">
             <span
-              className={`text-5xl font-extrabold ${
-                res === sum ? "text-green-200" : "text-white"
+              className={`text-5xl font-extrabold  ${
+                res === true ? "text-green-200 text-dark winner-name" : "text-white"
               }`}
             >
-              {res === sum ? "YOU WIN!" : "Keep Playing..."}
+              {res === true ? `${winner} WINS !!` : "Keep Playing..."}
             </span>
+           
           </span>
+
+          <div className="flex items-center justify-center bg-gradient-to-r from-red-300 to-purple-350 rounded-lg py-2 px-4 mb-2">
+          <span
+            className={`text-3xl font-extrabold text-white  `}
+          >
+            {`last roll was : ${lastPoints}`}
+          </span>
+        </div>
+
+          <div className="flex flex-columns">
+            {
+              chipsArr.map((i)=>
+              {
+                return <div className={`design1 absolute right-0 mt-${dist+=40} mr-4 flex `}><span>{i.name}</span><span className="ml-20 mt-1 text-6xl">{i.chips}</span></div>
+              }) 
+            }
+{/* {     
+     (chipsArr.length > 1)?(<div className="design1 absolute right-0 mt-40 mr-4 flex "><span >{chipsArr[1].name}</span><span className="ml-20 mt-1 text-6xl">{chipsArr[1].chips}</span></div>):(<div></div>)
+} */}
+
+          {/* <div className="design1 fixed right-0 mt-40 mr-4 flex"><span >{name}</span><span className="ml-20 mt-1 text-6xl">{chips}</span></div> */}
+            </div>
+          
 
 
         <br />

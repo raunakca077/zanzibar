@@ -15,5 +15,14 @@
   background-image: linear-gradient(135deg, #f39c12, #e74c3c); /* Gradient background */
 }
 
+.winner-name {
+  opacity: 0;
+  color: #af6d01;
+  transition: opacity 12s;
+}
+
+.winner-name.show {
+  opacity: 1;
+}
 
 
