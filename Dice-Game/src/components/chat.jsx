@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import elfImage from '../assets/elf.png';
 import cook from "universal-cookie";
 
-export const Chat = ({ skt }) => {
+export const Chat = ({ skt,roomNo}) => {
   const cookie = new cook();
   const sender = cookie.cookies.name;
   const [message, setMessage] = useState('');
@@ -37,7 +37,8 @@ export const Chat = ({ skt }) => {
     if (message.trim() !== '') {
       const data = {
         text: message,
-        sender: sender
+        sender: sender,
+        roomNo:roomNo,
       };
       skt.emit("message", data);
       setMessage('');

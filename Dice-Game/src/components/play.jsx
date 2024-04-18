@@ -10,7 +10,7 @@ import cook from "universal-cookie";
 const cki=new cook()
 
 
-export const Play = ({ players, sum, setAuth }) => {
+export const Play = ({ players,setAuth, socket,roomNo,player}) => {
   const [isTurn, setTurn] = useState(true);
   const [res, setRes] = useState(false);
   const [isStart, setStart] = useState(false);
@@ -21,18 +21,16 @@ export const Play = ({ players, sum, setAuth }) => {
   const [chipsArr,setChipsArr]=useState([]);
   const [pts,setPts]=useState({rank:0,score:""});
   const [lastPoints,setlastPoints]=useState("");
+ 
+  
 
   useEffect(() => {
-    const socket = io("http://localhost:3077");
-    setSkt(socket);
+    if (socket) {
+      setSkt(socket);
 
-    socket.on("connect", () => {
-      console.log("Connected to server");
-    });
-
-    socket.on("welcome", (data) => {
-      console.log(data);
-    });
+      socket.on("welcome", (data) => {
+          console.log(data);
+      });
 
     socket.on("start", (data) => {
       setStart(true);
@@ -40,15 +38,30 @@ export const Play = ({ players, sum, setAuth }) => {
       
     });
 
+    // socket.on("start-again",(data)=>
+    // {
+    //   setChipsArr([])
+    //   setPts({rank:0,score:""})
+    //   setlastPoints("")
+    // })
+
     socket.on("newPts", (data) => {
-      // console.log(data)
       setPts({rank:data.rank,score:data.score});
     });
 
-    const checkWinner=(data)=>
+    socket.on("start-again", (data) => {
+      setRes(false);
+      setChipsArr([]);
+      setlastPoints("");
+      setPts({rank:0,score:""})
+      setTurn(false)
+    });
+
+
+    const checkWinner=async(data)=>
   {
-    
-    
+    console.log(calculate(data))
+
     if(pts.rank==0)
       {
         let val=calculate(data);
@@ -56,47 +69,43 @@ export const Play = ({ players, sum, setAuth }) => {
         socket.emit("setPoints",val)
       }
      else{
-      let p1=pts;
-      let prevPoint=pts.rank;
-      // console.log(pts)
-      let p2=calculate(data);
-      let newPoint=p2.rank;
-      // console.log("hii")
-      setlastPoints(p2.score)
-      if(prevPoint<newPoint)
+      let prevPoint=pts;
+      let newPoint=calculate(data);
+      setlastPoints(newPoint.score)
+
+      const player0ChipsAfterTransfer = chipsArr[0].chips - (prevPoint.rank < newPoint.rank ? chipTransfer(prevPoint.score) : -chipTransfer(newPoint.score));
+      const player1ChipsAfterTransfer = chipsArr[1].chips - (prevPoint.rank > newPoint.rank ? chipTransfer(newPoint.score) : -chipTransfer(prevPoint.score));
+  
+      if (player0ChipsAfterTransfer <= 0) {
+        setRes(true);
+        setWinner(chipsArr[0].name);
+        setTimeout(() => {
+          setStart(false);
+          skt.emit("startAgain",roomNo);
+        }, 5000);
+       
+      } else if (player1ChipsAfterTransfer <= 0) {
+        setRes(true);
+        setWinner(chipsArr[1].name);
+        setTimeout(() => {
+          setStart(false);
+          skt.emit("startAgain",roomNo);
+
+        }, 5000);
+      }
+
+      if(prevPoint.rank<newPoint.rank)
       {
-        const temp=[{chips:chipsArr[0].chips - chipTransfer(p1.score) ,name:chipsArr[0].name},chipsArr[1]]
+        const temp=await[{chips:chipsArr[0].chips - chipTransfer(prevPoint.score) ,name:chipsArr[0].name},{chips:chipsArr[1].chips + chipTransfer(prevPoint.score) ,name:chipsArr[1].name}]
         setChipsArr(temp)
        
-        if(chipsArr[0].chips<=1)
-        {
-          setRes(true);
-          setWinner(chipsArr[0].name)
-          
-          setTimeout(() => {
-            setChipsArr([])
-            setStart(false)
-          }, 5000);  
-          
-        }
       }
   
-      else if(prevPoint>newPoint)
+      else if(prevPoint.rank>newPoint.rank)
       {
         
-        const temp=[chipsArr[0],{chips:chipsArr[1].chips - chipTransfer(pts.score) ,name:chipsArr[1].name}]
+        const temp=await[{chips:chipsArr[0].chips + chipTransfer(newPoint.score) ,name:chipsArr[0].name},{chips:chipsArr[1].chips - chipTransfer(newPoint.score) ,name:chipsArr[1].name}]
         setChipsArr(temp)
-        
-        if(chipsArr[1].chips<=1)
-        {
-          setRes(true);
-          setWinner(chipsArr[1].name)
-          setTimeout(() => {
-            setChipsArr([])
-            setStart(false)
-          }, 5000);  
-          
-        }
       }
       socket.emit("setPoints",{rank:0,score:""})
 
@@ -104,7 +113,7 @@ export const Play = ({ players, sum, setAuth }) => {
      }
     //  console.log(pts)
   }
-
+  
 
     socket.on("rolledNo", (data)=>
     {
@@ -117,38 +126,53 @@ export const Play = ({ players, sum, setAuth }) => {
       setTurn(data);
     });
 
-    socket.on("updatedChips", (data) => {
-      setChipsArr(chipsArr=>[...chipsArr,data]);        //ye itna simply nai hoga bro
-    });
+const handleChips=(data)=>
+{
+  setChipsArr(prev=>[...prev,data])
+}
+
+    socket.on("updatedChips",handleChips);
 
     return () => {
-      socket.disconnect();
+      socket.off("welcome");
+      socket.off("start");
+      socket.off("newPts");
+      socket.off("rolledNo");
+      socket.off("turn");
+      socket.off("updatedChips");
+      socket.off("start-again");
     };
-  }, [pts,]);
+    
+    ;}
+  }, [pts,chipsArr]);
 
   
+
+
   const logout = () => {
-    setAuth(false);
+    setAuth(false)
+    location.reload()
   };
 
   // const fun = (gotSum) => setRes(gotSum);
 
   const startGame = () => {
-    skt.emit("start", 1);
-    skt.emit("chips",{chips:5,name:cki.cookies.name});
-
+   
+    skt.emit("start", {roomNo:roomNo});
+    skt.emit("chips",{chips:5,name:cki.cookies.name,roomNo:roomNo});
   };
 
   const roll = () => {
     let gotSum = 0;
+    // console.log(chipsArr)
     const arr = [];
     for (let i = 0; i < players; i++) {
       arr.push(Math.round(Math.random() * 5) + 1);
       gotSum += arr[i];
     }
     // fun(gotSum);
-    skt.emit("rolled", arr);
-    
+    skt.emit("rolled", {arr:arr,roomNo:roomNo});
+    // console.log(chipsArr)
   };
 
 let dist=0
@@ -177,9 +201,9 @@ let dist=0
 
           <div className="flex flex-columns">
             {
-              chipsArr.map((i)=>
+              chipsArr.map((i,index)=>
               {
-                return <div className={`design1 absolute right-0 mt-${dist+=40} mr-4 flex `}><span>{i.name}</span><span className="ml-20 mt-1 text-6xl">{i.chips}</span></div>
+                return <div key={index} className={`design1 absolute right-0 mt-${dist+=40} mr-4 flex `}><span>{i.name}</span><span className="ml-20 mt-1 text-6xl">{i.chips}</span></div>
               }) 
             }
 {/* {     
@@ -194,7 +218,7 @@ let dist=0
         <br />
         <div className="flex justify-between">
           <Dice arr={rolledDice} skt={skt} />
-          <Chat skt={skt} />
+          <Chat skt={skt} roomNo={roomNo}/>
 
           <br />
           <br />
@@ -221,14 +245,29 @@ let dist=0
         {/*mazze ke liye simply onClick={logout v likh sakte thee}*/}
       </div>
     );
-  } else {
+  }
+  else
+  {
     return (<>
-      <button onClick={startGame}  className="bg-orange-500 hover:bg-orange-600 text-white h-20  font-bold py-1 px-4 rounded w-24 mx-auto my-auto p-8"
->
-        START
-      </button>
-        <ZanzibarRules/>
-      </>
-    );
+      {player ? (<>
+          <button onClick={startGame}  className="bg-orange-500 hover:bg-orange-600 text-white h-20  font-bold py-1 px-4 rounded w-24 mx-auto my-auto p-8"
+    >
+            START
+          </button>
+            <ZanzibarRules/>
+          </>
+        )
+      :( <div className="h-screen w-screen flex flex-col items-center justify-center">
+      <div className="bg-gradient-to-br from-gray-900 to-purple-900 p-8 rounded-lg shadow-md">
+        <h2 className="text-4xl font-bold mb-8 text-white">Waiting for other players</h2>
+        <p className="text-lg text-gray-300 mb-8">Please wait while other players join the room.</p>
+        <div className="flex justify-center">
+          <div className="w-12 h-12 rounded-full border-4 border-purple-600 border-t-transparent animate-spin"></div>
+        </div>
+      </div>
+    </div>
+    )}
+    </>
+    )
   }
 };

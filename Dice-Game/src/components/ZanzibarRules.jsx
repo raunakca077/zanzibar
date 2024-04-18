@@ -8,11 +8,11 @@ const ZanzibarRules = () => {
       <h2 className="text-2xl text-black font-bold mb-4">Rules of Zanzibar</h2>
       <ol className="list-decimal pl-6 space-y-2">
         <li>Zanzibar is a dice game that can be played with any number of players.</li>
-        <li>Each player starts with 20 chips (15 chips for a two-player game).</li>
-        <li>The game is played in rounds, where each round follows these steps:
+        <li>Each player starts with 5 chips.</li>
+        <li>The game follows these steps:
           <ol className="list-decimal pl-6 mt-2 space-y-1">
-            <li>The first player gets up to three rolls of the dice to get the highest score possible. They can stop after the first or second throw.</li>
-            <li>Subsequent players, in turn, try to get a higher score than the first player, using no more throws than the first player.</li>
+            <li>The first player rolls the dice. The score is displayed on the scoreboard.</li>
+            <li>Subsequent players, in turn, try to get a higher score than the first player.</li>
           </ol>
         </li>
         <li>The scoring system is based on the following combinations (in descending order):
@@ -45,7 +45,7 @@ const ZanzibarRules = () => {
           </ul>
         </li>
         <li>Multiple rounds are played, and the winner is the player who loses all their chips first.</li>
-        <li>The winner of the previous round rolls first in the next round.</li>
+        <li>Player can restart the game after the current ongoing game ends.</li>
       </ol>
     </div>
   );
