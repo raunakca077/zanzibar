@@ -14,7 +14,7 @@ import {Server} from "socket.io"
 const server = new http.createServer(app)
 const io=new Server(server,{
     cors:{
-        origin:"http://localhost:5173",
+        origin:"https://splendorous-pastelito-5ba02c.netlify.app",
         methods:["GET","POST"],
         credentials:true
     }
