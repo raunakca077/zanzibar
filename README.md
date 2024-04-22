@@ -34,9 +34,11 @@ Communication: Socket.IO for real-time communication between clients and the ser
 
 Styling: Tailwind CSS for modern and responsive styling.
 
-Deployment: Hosted on a cloud platform like Heroku or AWS for accessibility from anywhere.
+Deployment: Hosted on a cloud platform Render and Netlify.
 
 # Get ready to roll the dice and embark on an exhilarating journey with Zanzibar!
+
+# Game Link : https://splendorous-pastelito-5ba02c.netlify.app/
 
 
 
