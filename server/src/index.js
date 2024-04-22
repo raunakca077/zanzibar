@@ -20,7 +20,9 @@ const io=new Server(server,{
     }
 })
 
-app.use(cors());
+app.use(cors({
+     origin: 'https://splendorous-pastelito-5ba02c.netlify.app'
+}));
 app.use(express.json());
 
 connectDB();
