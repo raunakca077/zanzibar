@@ -23,7 +23,7 @@ Rounds continue until one player has no chips remaining, declaring them the winn
 
 ![Login](Asset/login.png)
 
-##### Create Room
+##### Room Creation
 
 ![create](Asset/create.png)
 
@@ -39,7 +39,7 @@ Rounds continue until one player has no chips remaining, declaring them the winn
 
 ![rules](Asset/rules.png)
 
-##### Game Page
+##### Real-Time Gaming And Chatting
 
 ![game](Asset/game.png)
 
