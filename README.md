@@ -67,7 +67,7 @@ Deployment: Hosted on a cloud platform Render and Netlify.
 
 # Get ready to roll the dice and embark on an exhilarating journey with Zanzibar!
 
-# Game Link : https://splendorous-pastelito-5ba02c.netlify.app/
+# Tey it out : https://splendorous-pastelito-5ba02c.netlify.app/
 
 
 
