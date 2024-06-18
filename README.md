@@ -15,6 +15,23 @@ Other combinations are scored based on the sum of the three dice.
 After each round, the player with the lowest score receives chips from the other players based on the winning hand.
 Rounds continue until one player has no chips remaining, declaring them the winner.
 
+
+### App Showcase :
+
+- Screenshots
+
+![Login](Asset/login.png)
+
+
+![homepage](Asset/homepage.png)
+
+
+![details](Asset/details.png)
+
+
+![ride](Asset/search.png
+
+
 # Features:
 
 Supports any number of players.
