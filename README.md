@@ -35,7 +35,7 @@ Rounds continue until one player has no chips remaining, declaring them the winn
 
 ![searching](Asset/searching.png)
 
-##### Rules and Start Page
+##### Rules And Start Page
 
 ![rules](Asset/rules.png)
 
