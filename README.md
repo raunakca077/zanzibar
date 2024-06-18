@@ -18,7 +18,6 @@ Rounds continue until one player has no chips remaining, declaring them the winn
 
 # App Showcase :
 
-### Screenshots
 
 ##### Login Page
 
