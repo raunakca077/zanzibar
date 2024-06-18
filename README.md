@@ -16,20 +16,33 @@ After each round, the player with the lowest score receives chips from the other
 Rounds continue until one player has no chips remaining, declaring them the winner.
 
 
-### App Showcase :
+# App Showcase :
 
-- Screenshots
+### Screenshots
+
+##### Login Page
 
 ![Login](Asset/login.png)
 
+##### Create Room
 
-![homepage](Asset/homepage.png)
+![create](Asset/create.png)
 
+##### Join Room
 
-![details](Asset/details.png)
+![search](Asset/search.png)
 
+##### Searching For Players
 
-![ride](Asset/search.png
+![searching](Asset/searching.png)
+
+##### Rules and Start Page
+
+![rules](Asset/rules.png)
+
+##### Game Page
+
+![game](Asset/game.png)
 
 
 # Features:
